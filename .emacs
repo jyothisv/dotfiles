@@ -391,7 +391,8 @@ directory"
   (let ((buf (get-buffer "*eshell*"))   ;buf = the eshell buffer if there is one.
                                         ;otherwise, nil
         (dir (file-name-directory (or (buffer-file-name)
-                                   "~")))
+                                   "~/")))
+        (win-height (/ (frame-height) 3))
                                    
         win)
     (unless buf                         ;if there is no eshell session open, create one in the background
@@ -401,12 +402,13 @@ directory"
     (if win                             ;if yes delete it
         (delete-window win)
       ;; Create a new window and go to it
-      (select-window (split-window-below -10))
+      (select-window (split-window-below (- win-height)))
       ;; otherwise, pop to the buffer
       (pop-to-buffer buf nil t)
       ;; Now change the working directory
 
       ;; Insert the cd dir
+      ; (eshell-send-input)
       (insert "cd " "\"" dir "\"")
       (eshell-send-input))))
 
