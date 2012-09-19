@@ -1,0 +1,19 @@
+#-*-shell-script-*-
+
+local curse=$CURSOR
+local num=${NUMERIC:-1}
+
+while ((curse > 0 && num > 0 )); do
+    # Until we find a number, skip
+    if [[ $BUFFER[curse] != [0-9] ]]; then
+	((curse--))
+	continue
+    fi
+    
+    while [[ $curse -gt 0  && $BUFFER[curse] == [0-9] ]]; do
+	[[ $num == 1 ]] && LBUFFER[curse]='?'
+	((curse--))
+    done
+	
+    ((num--))
+done

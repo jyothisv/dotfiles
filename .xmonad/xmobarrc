@@ -1,0 +1,15 @@
+Config { font = "xft:arial:size=16" -- "-*-terminus-*-*-*-*-28-*-*-*-*-*-*-*"
+       , bgColor = "#222222"
+       , fgColor = "grey"
+       , position = Top
+       , lowerOnStart = True
+       , commands = [ Run Memory ["-t","<usedratio>%","-L", "0", "-H", "90", "--high", "red"] 20
+		    , Run Cpu  ["-t", "<total>%", "-L", "0", "-H", "90", "--high", "red" ] 20
+		    , Run Date "%a %b %_d %l:%M" "date" 600
+--		    , Run DiskIO [("/","<total>")] [] 20
+		    , Run StdinReader
+                    ]
+       , sepChar = "%"
+       , alignSep = "}{"
+       , template = "%StdinReader%}{<fc=#888888>%cpu%</fc> <fc=#888888>%memory%</fc> | <fc=#ffffff>%date%</fc> "
+       }

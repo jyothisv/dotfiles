@@ -1,0 +1,7 @@
+#-*-shell-script-*-
+
+local num=${NUMERIC:-1}
+
+zmodload -i zsh/deltochar
+
+zle zap-to-char -n $((-num))

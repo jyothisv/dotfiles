@@ -1,0 +1,20 @@
+#-*-shell-script-*-
+
+if [[ $LASTWIDGET == add-an-option ]]; then
+    return 0
+fi
+
+curse=$CURSOR
+CURSOR=0
+#zle beginning-of-line
+if ! zle forward-word; then
+    return 1
+fi
+
+if [[ $LBUFFER[CURSOR] != [[:space:]] ]]; then
+    LBUFFER+=' '
+fi
+
+LBUFFER+='- '
+((CURSOR--))
+
