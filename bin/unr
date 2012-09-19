@@ -1,1 +1,72 @@
-/home/foo/bin/unr
+#!/bin/zsh
+
+# Extract .zip or .rar and remove the archives if extraction is successful.
+# If the number of extracted files is more than $NUM_FILES_LIMIT, create a
+# directory named after the original archive and move all files there.
+
+
+
+filename="$@[-1]"		# filename would be the last parameter
+NUM_FILES_LIMIT=4
+retval=0
+
+if [[ $filename == *.(rar|zip) ]]; then
+    tmpdir="$(mktemp -d unr.XXXXXXXX)"
+else
+    echo "Synopsis: $0 file.rar or $0 file.zip" 2>&1
+    exit 1
+fi
+
+
+rmtemp() {
+    if [[ -e $tmpdir ]]; then 
+        num_files=$(ls "$tmpdir" | wc -l)
+        if [[ $num_files -eq 0 ]]; then
+            rmdir $tmpdir
+        fi
+    fi
+}
+
+trap rmtemp 1 2
+
+
+if [[ $filename == *.rar ]];then # check if it is a rar file
+    unrar x -x'*.url' -x'*.URL'  -x'*.txt' -x'*.TXT' "$@" "$tmpdir/"; # -x'*.htm' -x'*.HTM' -x'*.html' -x'*.HTML' -x'*.txt' -x'*.TXT'
+    retval=$?
+    if [[ $retval -eq 0 ]]; then
+	if [[ $filename == *.part0#1.rar ]];then
+	    new_dir=${filename%.part0#1.rar}
+	    rm -- "${filename%%0#1.rar}"*.rar
+	else
+	    new_dir=${filename:r}
+	    rm -- $filename
+	fi
+    fi
+	
+        
+elif [[ $filename == *.zip ]];then # check if it is a zip file
+    unzip  "$@" -x '*.url' '*.URL' '*.htm' '*.HTM' '*.html' '*.HTML' '*.txt' '*.TXT' -d "$tmpdir/"
+    retval=$?
+    if [[ $retval -eq 0 ]]; then 
+	new_dir=${filename:r}
+	rm $filename
+    fi
+
+fi
+
+# Now do the cleanup necessary
+if [[ $retval -eq 0 ]]; then
+    no_files="$(ls $tmpdir/ | wc -l)"
+
+    # if there are only < $NUM_FILES_LIMIT files, we don't need the directory - copy the files and remove the dir
+    if (( no_files < $NUM_FILES_LIMIT )); then
+        mv "$tmpdir"/* .; rmdir "$tmpdir"
+    elif		# rename the directory to something meaningful if possible
+	[[ ! -e "$new_dir" ]];then
+	echo mv "$tmpdir" "$new_dir"
+    fi
+	
+else			# extraction unsuccessful.  Remove the temp dir
+    rm -rf "$tmpdir"
+
+fi
