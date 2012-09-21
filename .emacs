@@ -518,6 +518,8 @@ directory"
         (if (string-match-p s1 (match-string 0)) (replace-match s2))))))
 
 
+
+
 (defun exchange-strings (s1 s2)
   "Exchange s1 and s2"
 
@@ -544,10 +546,11 @@ sWith this: ")
                                         ; (message (format "startWhile: %s, %s" (match-beginning 0) (match-end 0)))
                                         ;        (setq match-data-backup (match-data))
       (unless (char-equal user-input ?!)
-        (setq overlay (make-overlay (match-beginning 0) (match-end 0))) ;create an overlay to highlight the match
-        (overlay-put overlay 'face '((foreground-color . "yellow") (background-color . "blue")))
-        (setq user-input (read-char "Replace? "))
-        (delete-overlay overlay))
+        (unwind-protect                 ;so that C-g in an awkard moment doesn't leave a glaring highlight
+            (progn (setq overlay (make-overlay (match-beginning 0) (match-end 0))) ;create an overlay to highlight the match
+                   (overlay-put overlay 'face '((foreground-color . "yellow") (background-color . "blue")))
+                   (setq user-input (read-char "Replace? ")))
+        (delete-overlay overlay)))
       
       (unless (char-equal user-input ?n)
                                         ;          (set-match-data match-data-backup)
@@ -556,6 +559,10 @@ sWith this: ")
 
 
 
+;; TODO: 1. Remove the need for the numerical argument. Get pairs of regexps until the user simply presses return
+;; at a search-regexp prompt. For this we need to add dynamic resizing of arrays
+;; TODO: 2. As in exchange-strings, reorder the search-regexps so that the more general regexps come only
+;; after the more specific ones, irrespective of the user input order.
 (defun parallel-query-replace-regexp (n)
   "Do query-replace-regexp for n pairs of regexps in parallel"
   (interactive "p")
