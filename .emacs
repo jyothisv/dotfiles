@@ -532,6 +532,13 @@ sWith this: ")
         match-data-backup)
     (if (region-active-p)
         (setq start-pos (region-beginning) end-pos (region-end)))
+
+    ;; Reorder the strings if necessary.
+    ;; if qs2 is a more specific string, exchange qs1 and qs2
+    (if (string-match-p qs1 qs2)
+        (let ((temp-string qs2))
+          (setq qs2 qs1)
+          (setq qs1 temp-string)))
     (goto-char start-pos)
     (while (search-forward-regexp (format "%s\\|%s" qs1 qs2) end-pos t)
                                         ; (message (format "startWhile: %s, %s" (match-beginning 0) (match-end 0)))
