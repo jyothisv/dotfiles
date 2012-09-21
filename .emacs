@@ -119,11 +119,11 @@
 
 
 ;; Ido mode
-(setq confirm-nonexistent-file-or-buffer nil)
-(setq ido-enable-flex-matching t)
-(setq ido-enable-last-directory-history nil)
-(setq ido-confirm-unique-completion nil)
-(setq ido-create-new-buffer 'always)
+;; (setq confirm-nonexistent-file-or-buffer nil)
+;; (setq ido-enable-flex-matching t)
+;; (setq ido-enable-last-directory-history nil)
+;; (setq ido-confirm-unique-completion nil)
+;; (setq ido-create-new-buffer 'always)
 
 
 ;; Org-mode
@@ -727,14 +727,15 @@ sWith this: ")
 
 (require 'smart-compile)
 
-(require 'ido)
-(ido-mode 1)
-(ido-everywhere 1)
+;; (require 'ido)
+;; (ido-mode 1)
+;; (ido-everywhere 1)
 
 ;; Icicles
-;; (add-to-list 'load-path "~/.emacs.d/lib/icicles")
-;; (require 'icicles)
-;; (icy-mode 1)
+(setq load-path (cons "/usr/share/emacs/site-lisp/icicles" load-path))
+(require 'icicles)
+(eval-after-load "ring" '(progn (require 'ring+)))
+(icy-mode 1)
 
 (require 'evil-numbers)
 
