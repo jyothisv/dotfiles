@@ -545,6 +545,48 @@ sWith this: ")
 
 
 
+(defun parallel-query-replace-regexp (n)
+  "Do query-replace-regexp for n pairs of regexps in parallel"
+  (interactive "p")
+  (let ((start-pos (point))
+        (end-pos (point-max))
+        (user-input ?y)
+        match-data-backup)
+    (if (region-active-p)
+        (setq start-pos (region-beginning) end-pos (region-end)))
+    ;; Get n pairs of regexps from the user.
+    ;; Simultaneously, create a regexp union from all the search regexps.
+    (let ((search-regexps (make-vector n ""))
+          (replace-regexps (make-vector n ""))
+          overlay
+          (regexp-union ""))
+      (dotimes (i n)
+        (aset search-regexps i  (read-regexp (format "Replace regexp %d " (1+ i))))
+        (if (= i 0)
+            (setq regexp-union (aref search-regexps 0))
+          (setq regexp-union (format "%s\\|%s" regexp-union (aref search-regexps i))))
+        (aset replace-regexps i  (read-regexp (format "with regexp %d " (1+ i)))))
+
+      ;; goto the first character
+      (goto-char start-pos)
+      (while (search-forward-regexp regexp-union end-pos t)
+        (unless (char-equal user-input ?!)
+          (setq overlay (make-overlay (match-beginning 0) (match-end 0))) ;create an overlay to highlight the match
+          (overlay-put overlay 'face '((foreground-color . "yellow") (background-color . "blue")))
+          (setq user-input (read-char "Replace? ")) ;TODO: Move this  downwards
+          (delete-overlay overlay))
+        (unless (char-equal user-input ?n)
+          (goto-char (match-beginning 0))
+          (let ((i 0))
+            (while (not (and (< i n) (looking-at (aref search-regexps i))))
+              (setq i (1+ i)))
+            (if (< i n)
+                (replace-match (aref replace-regexps i)))))))))
+
+  
+
+
+
 ;; ******************** END OF FUNCTIONS ********************
 
 
