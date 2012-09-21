@@ -408,7 +408,8 @@ directory"
       ;; Now change the working directory
 
       ;; Insert the cd dir
-      ; (eshell-send-input)
+      (eshell-kill-input)               ;clean up the current line so that the next command doesn't
+                                        ;get added to that.
       (insert "cd " "\"" dir "\"")
       (eshell-send-input))))
 
@@ -500,9 +501,48 @@ directory"
     (if (region-active-p)
         (setq start-pos (region-beginning) end-pos (region-end)))
     (goto-char start-pos)
-    (while (re-search-forward "\\([0-9]+\\)" end-pos t)
+    (while (re-search-forward "\\([0-9]+\\(\\.[0-9]*\\)?\\)" end-pos t)
       (incf sum (string-to-number (match-string 1))))
-    (message "Total: %d" sum))))
+    (message "Total: %s" sum))))
+
+
+(defun test-replace (s1 s2)
+  "Test for replacing s1 with s2"
+  (interactive)
+  (save-excursion
+    (let ((start-pos (point-min))
+          (end-pos (point-max)))
+      (if (region-active-p)
+          (setq start-pos (region-beginning) end-pos (region-end)))
+      (while (search-forward-regexp s1 end-pos t)
+        (if (string-match-p s1 (match-string 0)) (replace-match s2))))))
+
+
+(defun exchange-strings (s1 s2)
+  "Exchange s1 and s2"
+
+  (interactive "sExchange this string: 
+sWith this: ")
+                                        ;  (save-excursion
+  (let ((start-pos (point))
+        (end-pos (point-max))
+        (qs1 (regexp-quote s1))
+        (qs2 (regexp-quote s2))
+        (user-input ?y)
+        match-data-backup)
+    (if (region-active-p)
+        (setq start-pos (region-beginning) end-pos (region-end)))
+    (goto-char start-pos)
+    (while (search-forward-regexp (format "%s\\|%s" qs1 qs2) end-pos t)
+                                        ; (message (format "startWhile: %s, %s" (match-beginning 0) (match-end 0)))
+                                        ;        (setq match-data-backup (match-data))
+      (if (not (char-equal user-input ?!))
+          (setq user-input (read-char "Replace? ")))
+      (unless (char-equal user-input ?n)
+                                        ;          (set-match-data match-data-backup)
+                                        ;    (message (format "%s, %s" (match-beginning 0) (match-end 0))))))))
+        (if (string-match-p qs1 (match-string 0)) (replace-match qs2) (replace-match qs1))))))
+
 
 
 ;; ******************** END OF FUNCTIONS ********************
