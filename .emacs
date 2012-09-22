@@ -15,7 +15,7 @@
 ;; default frame properties
 (setq default-frame-alist
       (if (eq this-computer-type 'laptop)
-          '((font . "-*-terminus-*-*-*-*-22-*-*-*-*-*-iso8859-*"))
+          '((font . "Monospace-15"))
         '((font . "-*-terminus-*-*-*-*-24-*-*-*-*-*-iso8859-*"))))
 
 
@@ -127,11 +127,11 @@
 
 
 ;; Ido mode
-;; (setq confirm-nonexistent-file-or-buffer nil)
-;; (setq ido-enable-flex-matching t)
-;; (setq ido-enable-last-directory-history nil)
-;; (setq ido-confirm-unique-completion nil)
-;; (setq ido-create-new-buffer 'always)
+(setq confirm-nonexistent-file-or-buffer nil)
+(setq ido-enable-flex-matching t)
+(setq ido-enable-last-directory-history nil)
+(setq ido-confirm-unique-completion nil)
+(setq ido-create-new-buffer 'always)
 
 
 ;; Org-mode
@@ -266,7 +266,8 @@
 (define-key global-map (kbd "C-o") 'vim-open-line-below)
 (define-key global-map (kbd "C-S-o") 'vim-open-line-above)
 
-
+;; imenu with ido
+(global-set-key "\C-ci" 'ido-goto-symbol) 
 
 ;;*********************  END OF KEY BINDINGS  ********************
 
@@ -437,8 +438,10 @@ directory"
 (defun copy-line (arg)
   "Copy lines (as many as prefix argument) in the kill ring"
   (interactive "p")
-  (kill-ring-save (line-beginning-position)
-		  (line-beginning-position (+ 1 arg)))
+  (save-excursion
+    (forward-line -1)
+    (kill-ring-save (line-beginning-position)
+                    (line-beginning-position (+ 1 arg))))
   (message "%d line%s copied" arg (if (= 1 arg) "" "s")))
 
 
@@ -615,6 +618,56 @@ sWith this: ")
                 (replace-match (aref replace-regexps i)))))))))
 
   
+;; From EmacsWiki
+
+(defun ido-goto-symbol (&optional symbol-list)
+  "Refresh imenu and jump to a place in the buffer using Ido."
+  (interactive)
+  (unless (featurep 'imenu)
+    (require 'imenu nil t))
+  (cond
+   ((not symbol-list)
+    (let ((ido-mode ido-mode)
+          (ido-enable-flex-matching
+           (if (boundp 'ido-enable-flex-matching)
+               ido-enable-flex-matching t))
+          name-and-pos symbol-names position)
+      (unless ido-mode
+        (ido-mode 1)
+        (setq ido-enable-flex-matching t))
+      (while (progn
+               (imenu--cleanup)
+               (setq imenu--index-alist nil)
+               (ido-goto-symbol (imenu--make-index-alist))
+               (setq selected-symbol
+                     (ido-completing-read "Symbol? " symbol-names))
+               (string= (car imenu--rescan-item) selected-symbol)))
+      (unless (and (boundp 'mark-active) mark-active)
+        (push-mark nil t nil))
+      (setq position (cdr (assoc selected-symbol name-and-pos)))
+      (cond
+       ((overlayp position)
+        (goto-char (overlay-start position)))
+       (t
+        (goto-char position)))))
+   ((listp symbol-list)
+    (dolist (symbol symbol-list)
+      (let (name position)
+        (cond
+         ((and (listp symbol) (imenu--subalist-p symbol))
+          (ido-goto-symbol symbol))
+         ((listp symbol)
+          (setq name (car symbol))
+          (setq position (cdr symbol)))
+         ((stringp symbol)
+          (setq name symbol)
+          (setq position
+                (get-text-property 1 'org-imenu-marker symbol))))
+        (unless (or (null position) (null name)
+                    (string= (car imenu--rescan-item) name))
+          (add-to-list 'symbol-names name)
+          (add-to-list 'name-and-pos (cons name position))))))))
+
 
 
 
@@ -784,6 +837,10 @@ sWith this: ")
 ;; (add-hook 'scala-mode-hook 'ensime-scala-mode-hook)
 
 
+;; R
+(setq load-path (cons "/usr/share/emacs/site-lisp/ess" load-path))
+(load "/usr/share/emacs/site-lisp/ess/ess-site")
+
 
 ;;*****************  END OF MODES  *******************
 
@@ -793,22 +850,34 @@ sWith this: ")
 ;; Loadpath
 
 (add-to-list 'load-path "~/.emacs.d/lib")
+;; (add-to-list 'load-path "~/.emacs.d/lib/mc")
+;; (require 'multiple-cursors)
+
+;; (global-set-key (kbd "C->") 'mc/mark-next-like-this)
+;; (global-set-key (kbd "C-<") 'mc/mark-previous-like-this)
+
+; (add-to-list 'package-archives '("elpa" . "http://tromey.com/elpa/"))
+
 
 (require 'misc)
 
 ; (require 'rainbow-delimiters)
 
+
 (require 'smart-compile)
 
-;; (require 'ido)
-;; (ido-mode 1)
-;; (ido-everywhere 1)
+(require 'ido)
+(ido-mode 1)
+(ido-everywhere 1)
 
 ;; Icicles
-(setq load-path (cons "/usr/share/emacs/site-lisp/icicles" load-path))
-(require 'icicles)
-(eval-after-load "ring" '(progn (require 'ring+)))
-(icy-mode 1)
+;; (setq load-path (cons "/usr/share/emacs/site-lisp/icicles" load-path))
+;; (require 'icicles)
+;; (eval-after-load "ring" '(progn (require 'ring+)))
+;; (icy-mode 1)
+
+;; (setq icicle-show-Completions-initially-flag t)
+;; (setq icicle-expand-input-to-common-match 0)
 
 (require 'evil-numbers)
 
