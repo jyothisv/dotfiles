@@ -15,7 +15,8 @@
 ;; default frame properties
 (setq default-frame-alist
       (if (eq this-computer-type 'laptop)
-          '((font . "Monospace-15"))
+       ;   '((font . "Monospace-15"))
+          '((font . "Ubuntu Mono:bold:size=20"))
         '((font . "-*-terminus-*-*-*-*-24-*-*-*-*-*-iso8859-*"))))
 
 
@@ -268,6 +269,8 @@
 
 ;; imenu with ido
 (global-set-key "\C-ci" 'ido-goto-symbol) 
+
+(global-set-key (kbd "C-=") 'er/expand-region)
 
 ;;*********************  END OF KEY BINDINGS  ********************
 
@@ -839,7 +842,7 @@ sWith this: ")
 
 ;; R
 (setq load-path (cons "/usr/share/emacs/site-lisp/ess" load-path))
-(load "/usr/share/emacs/site-lisp/ess/ess-site")
+(load "/usr/share/emacs/site-lisp/ess/ess-site" t t)
 
 
 ;;*****************  END OF MODES  *******************
@@ -920,6 +923,14 @@ sWith this: ")
 
 (add-to-list 'load-path "/usr/share/emacs/scala-mode")
 ;(require 'scala-mode-auto)
+
+
+(add-to-list 'load-path "~/.emacs.d/lib/helm")
+(require 'helm-config nil t)
+
+(add-to-list 'load-path "~/.emacs.d/lib/expand-region")
+(require 'expand-region)
+
 
 
 ;; ******************** END OF PACKAGES ********************
