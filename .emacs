@@ -769,7 +769,7 @@ sWith this: ")
 
 (add-hook 'haskell-mode-hook 'turn-on-haskell-doc-mode)
 (add-hook 'haskell-mode-hook 'turn-on-haskell-indentation)
-(require 'inf-haskell)
+(require 'inf-haskell nil t)
 
 ;; Prolog
 (autoload 'run-prolog "prolog" "Start a Prolog sub-process." t)
@@ -859,16 +859,16 @@ sWith this: ")
 ; (add-to-list 'package-archives '("elpa" . "http://tromey.com/elpa/"))
 
 
-(require 'misc)
+(require 'misc nil t)
 
-; (require 'rainbow-delimiters)
+; (require 'rainbow-delimiters nil t)
 
 
-(require 'smart-compile)
+(require 'smart-compile nil t)
 
-(require 'ido)
-(ido-mode 1)
-(ido-everywhere 1)
+(if (require 'ido nil t)
+    (progn (ido-mode 1)
+           (ido-everywhere 1)))
 
 ;; Icicles
 ;; (setq load-path (cons "/usr/share/emacs/site-lisp/icicles" load-path))
@@ -879,20 +879,19 @@ sWith this: ")
 ;; (setq icicle-show-Completions-initially-flag t)
 ;; (setq icicle-expand-input-to-common-match 0)
 
-(require 'evil-numbers)
+(require 'evil-numbers nil t)
 
 
 
 ;; Auto-complete
-(require 'auto-complete-config)
-(add-to-list 'ac-dictionary-directories "~/.emacs.d/lib/ac-dict")
-(ac-config-default)
-(setq ac-auto-start 5)
+(if (require 'auto-complete-config nil t)
+    (progn (add-to-list 'ac-dictionary-directories "~/.emacs.d/lib/ac-dict")
+           (ac-config-default)
+           (setq ac-auto-start 5)
+           (define-key ac-mode-map (kbd "M-<f1>") 'auto-complete)))
 
-(define-key ac-mode-map (kbd "M-<f1>") 'auto-complete)
 
-
-(require 'ac-math)
+(require 'ac-math nil t)
 
 (add-to-list 'ac-modes 'latex-mode)   ; make auto-complete aware of {{{latex-mode}}}
 
@@ -908,15 +907,15 @@ sWith this: ")
 ;(require 'w3m)
 
 
-(require 'iy-go-to-char)
+(require 'iy-go-to-char nil t)
 
 
 
 ;; Contol-lock
-(require 'control-lock)
-(control-lock-keys)
+;; (require 'control-lock)
+;; (control-lock-keys)
 
-(require 'ace-jump-mode)
+(require 'ace-jump-mode nil t)
 
 
 (add-to-list 'load-path "/usr/share/emacs/scala-mode")
